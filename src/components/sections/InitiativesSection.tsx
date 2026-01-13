@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
 import { initiatives } from '../../data/initiatives'
+import { SectionCard } from '../ui/SectionCard'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -16,25 +17,25 @@ export function InitiativesSection() {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Initial state: Header hidden until section is reached
+            // Header wrapper starts HIDDEN - only shows when scrolled into section
             gsap.set(headerWrapperRef.current, {
                 opacity: 0,
                 visibility: 'hidden'
             })
 
+            // Initial state: Header starts large, centered, and INVISIBLE
             gsap.set(headerRef.current, {
                 scale: 5,
                 y: '60vh',
                 x: '50vw',
                 transformOrigin: 'center center',
-                opacity: 1
+                opacity: 0
             })
 
-            // Control visibility - hide when NOT in section
-            // Start at 'top top' so header only shows after previous section scrolled away
+            // Show header wrapper only when THIS section is at top (after About disappeared)
             ScrollTrigger.create({
                 trigger: sectionRef.current,
-                start: 'top top',
+                start: 'top top', // Only when section reaches top of viewport
                 end: 'bottom top',
                 onEnter: () => {
                     gsap.set(headerWrapperRef.current, { opacity: 1, visibility: 'visible' })
@@ -50,8 +51,22 @@ export function InitiativesSection() {
                 }
             })
 
-            // Header zooms from center-bottom to left position
-            // Scrub means it reverses when scrolling back up
+            // Header opacity fades in FAST on entry
+            gsap.fromTo(headerRef.current,
+                { opacity: 0 },
+                {
+                    opacity: 1,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: 0.5
+                    }
+                }
+            )
+
+            // Header zooms in from center-bottom to left position (slower)
             gsap.fromTo(headerRef.current,
                 {
                     scale: 5,
@@ -72,17 +87,16 @@ export function InitiativesSection() {
                 }
             )
 
-            // Header pinches out as soon as last card scrolls up
+            // Header fades out as section ends (no scale change)
             gsap.fromTo(headerRef.current,
-                { scale: 1 },
+                { opacity: 1 },
                 {
-                    scale: 0,
                     opacity: 0,
                     ease: 'power2.in',
                     scrollTrigger: {
                         trigger: cardsContainerRef.current,
-                        start: 'bottom center',
-                        end: 'bottom top',
+                        start: 'bottom 80%',
+                        end: 'bottom 30%',
                         scrub: 1
                     }
                 }
@@ -98,7 +112,7 @@ export function InitiativesSection() {
             id="initiatives"
             ref={sectionRef}
             style={{
-                minHeight: '350vh',
+                minHeight: '250vh',
                 position: 'relative',
                 background: 'transparent',
             }}
@@ -117,6 +131,7 @@ export function InitiativesSection() {
                     justifyContent: 'center',
                     paddingLeft: '10%',
                     paddingRight: '40px',
+                    paddingBottom: '24vh',
                     zIndex: 5,
                     pointerEvents: 'none'
                 }}
@@ -124,7 +139,7 @@ export function InitiativesSection() {
                 <h1
                     ref={headerRef}
                     style={{
-                        fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
+                        fontSize: 'clamp(3rem, 6vw, 5rem)',
                         fontWeight: 800,
                         color: isDark ? '#ffffff' : '#000000',
                         lineHeight: 1,
@@ -136,9 +151,9 @@ export function InitiativesSection() {
                         pointerEvents: 'auto'
                     }}
                 >
-                    OUR
+                    <span style={{ color: '#ffffff' }}>OUR</span>
                     <br />
-                    <span style={{ fontWeight: 300 }}>INITIATIVES</span>
+                    <span style={{ color: '#ff3333' }}>INITIATIVES</span>
                 </h1>
             </div>
 
@@ -147,109 +162,36 @@ export function InitiativesSection() {
                 ref={cardsContainerRef}
                 style={{
                     marginLeft: '35%',
-                    width: '65%',
+                    marginRight: '5%',
+                    width: '55%',
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '24px',
-                    padding: '150vh 5% 30vh 0',
+                    gridTemplateColumns: 'repeat(2, 280px)',
+                    gap: '32px',
+                    justifyContent: 'center',
+                    padding: '150vh 0 20vh 0',
                     position: 'relative',
                     alignContent: 'start',
                     zIndex: 10
                 }}
             >
                 {initiatives.map((item, index) => (
-                    <Link
-                        to={`/initiative/${item.id}`}
-                        key={index}
-                        className="initiative-card"
-                        data-cursor="view"
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.08)',
-                            backdropFilter: 'blur(20px)',
-                            WebkitBackdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '16px',
-                            padding: '32px',
-                            boxSizing: 'border-box',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            minHeight: '380px',
-                            marginTop: index % 2 !== 0 ? '120px' : '0',
-                            textDecoration: 'none',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        {/* Label with color bar */}
-                        <div style={{ marginBottom: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{
-                                    width: '4px',
-                                    height: '20px',
-                                    background: '#e82828'
-                                }}></div>
-                                <span style={{
-                                    fontSize: '0.85rem',
-                                    fontWeight: 500,
-                                    color: '#e82828',
-                                    textTransform: 'uppercase'
-                                }}>
-                                    {item.category}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Large Title */}
-                        <div style={{ marginBottom: '8px' }}>
-                            <h3 style={{
-                                fontSize: '2.5rem',
-                                fontWeight: 800,
-                                margin: 0,
-                                fontFamily: '"Geist", sans-serif',
-                                lineHeight: 1,
-                                textTransform: 'uppercase',
-                                color: '#ffffff',
-                                letterSpacing: '-0.02em'
-                            }}>
-                                {item.title}
-                            </h3>
-                        </div>
-
-                        {/* Description */}
-                        <p style={{
-                            fontSize: '0.9rem',
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            margin: '12px 0 24px 0',
-                            fontWeight: 400,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            flexGrow: 1
-                        }}>
-                            {item.description}
-                        </p>
-
-                        {/* Bottom Action */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginTop: 'auto'
-                        }}>
-                            <span style={{ color: '#e82828', fontSize: '1rem' }}>→</span>
-                            <span style={{
-                                fontSize: '0.85rem',
-                                fontWeight: 700,
-                                color: '#ffffff',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.02em'
-                            }}>
-                                LEARN MORE
-                            </span>
-                        </div>
-                    </Link>
+                    <div key={index} style={{ transform: index % 2 === 1 ? 'translateY(50px)' : 'none' }}>
+                        <Link
+                            to={`/initiative/${item.id}`}
+                            data-cursor="view"
+                            style={{ textDecoration: 'none', display: 'block' }}
+                        >
+                            <SectionCard
+                                className="initiative-card"
+                                label={item.category}
+                                labelColor="#e82828"
+                                title={item.title}
+                                subtitle=""
+                                description={item.description}
+                                linkText="LEARN MORE"
+                            />
+                        </Link>
+                    </div>
                 ))}
             </div>
         </section>

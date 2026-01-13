@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useTheme } from '../../context/ThemeContext'
+import { SectionCard } from '../ui/SectionCard'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -61,25 +62,25 @@ export function AboutSection() {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Initial state: Header hidden until section is reached
+            // Header wrapper starts HIDDEN - only shows when scrolled into section
             gsap.set(headerWrapperRef.current, {
                 opacity: 0,
                 visibility: 'hidden'
             })
 
+            // Initial state: Header starts large, centered, and INVISIBLE
             gsap.set(headerRef.current, {
                 scale: 5,
                 y: '60vh',
                 x: '50vw',
                 transformOrigin: 'center center',
-                opacity: 1
+                opacity: 0
             })
 
-            // Control visibility - hide when NOT in section
-            // Start at 'top top' so header only shows after Hero is scrolled away
+            // Show header wrapper when section reaches top (same as animation start)
             ScrollTrigger.create({
                 trigger: sectionRef.current,
-                start: 'top top', // Only when section reaches top of viewport
+                start: 'top top', // Match animation start
                 end: 'bottom top',
                 onEnter: () => {
                     gsap.set(headerWrapperRef.current, { opacity: 1, visibility: 'visible' })
@@ -91,13 +92,26 @@ export function AboutSection() {
                     gsap.set(headerWrapperRef.current, { opacity: 1, visibility: 'visible' })
                 },
                 onLeaveBack: () => {
-                    // When scrolling back up past section start, hide immediately
                     gsap.set(headerWrapperRef.current, { opacity: 0, visibility: 'hidden' })
                 }
             })
 
-            // Header zooms from center-bottom to left position
-            // Scrub means it reverses when scrolling back up
+            // Header opacity fades in FAST on entry
+            gsap.fromTo(headerRef.current,
+                { opacity: 0 },
+                {
+                    opacity: 1,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: 0.5
+                    }
+                }
+            )
+
+            // Header zooms in from center-bottom to left position (slower)
             gsap.fromTo(headerRef.current,
                 {
                     scale: 5,
@@ -118,17 +132,16 @@ export function AboutSection() {
                 }
             )
 
-            // Header pinches out as soon as last card scrolls up
+            // Header fades out as section ends (no scale change)
             gsap.fromTo(headerRef.current,
-                { scale: 1 },
+                { opacity: 1 },
                 {
-                    scale: 0,
                     opacity: 0,
                     ease: 'power2.in',
                     scrollTrigger: {
                         trigger: cardsContainerRef.current,
-                        start: 'bottom center', // When cards are about to scroll off
-                        end: 'bottom top',
+                        start: 'bottom 80%',
+                        end: 'bottom 30%',
                         scrub: 1
                     }
                 }
@@ -144,7 +157,7 @@ export function AboutSection() {
             id="about"
             ref={sectionRef}
             style={{
-                minHeight: '350vh',
+                minHeight: '250vh',
                 position: 'relative',
                 background: 'transparent',
                 marginTop: '-20vh',
@@ -164,6 +177,7 @@ export function AboutSection() {
                     justifyContent: 'center',
                     paddingLeft: '10%',
                     paddingRight: '40px',
+                    paddingBottom: '24vh',
                     zIndex: 5,
                     pointerEvents: 'none' // Allow clicks through to content behind
                 }}
@@ -171,7 +185,7 @@ export function AboutSection() {
                 <h1
                     ref={headerRef}
                     style={{
-                        fontSize: 'clamp(3rem, 5vw, 4rem)',
+                        fontSize: 'clamp(3rem, 6vw, 5rem)',
                         fontWeight: 800,
                         color: isDark ? '#ffffff' : '#000000',
                         lineHeight: 1,
@@ -183,142 +197,44 @@ export function AboutSection() {
                         pointerEvents: 'auto'
                     }}
                 >
-                    ABOUT
+                    <span style={{ color: '#ffffff' }}>ABOUT</span>
                     <br />
-                    <span style={{ fontWeight: 300 }}>US</span>
+                    <span style={{ color: '#ff3333' }}>US</span>
                 </h1>
             </div>
 
             {/* Right Side - Cards that scroll naturally */}
             <div
                 ref={cardsContainerRef}
+                className="cards-grid"
                 style={{
-                    marginLeft: '35%', // Push right of the fixed header
-                    width: '65%',
+                    marginLeft: '35%',
+                    marginRight: '5%',
+                    width: '55%',
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '20px',
-                    padding: '150vh 5% 30vh 0', // Cards appear AFTER header zoom completes
+                    gridTemplateColumns: 'repeat(2, 280px)',
+                    gap: '32px',
+                    justifyContent: 'center',
+                    padding: '180vh 0 20vh 0',
                     position: 'relative',
                     alignContent: 'start',
                     zIndex: 10
                 }}
             >
                 {cards.map((card, index) => (
-                    <div
-                        key={index}
-                        className="about-card"
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.08)',
-                            backdropFilter: 'blur(20px)',
-                            WebkitBackdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '16px',
-                            padding: '32px',
-                            boxSizing: 'border-box',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            minHeight: '380px',
-                            marginTop: index % 2 !== 0 ? '120px' : '0',
-                        }}
-                    >
-                        {/* Label with color bar */}
-                        <div style={{ marginBottom: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{
-                                    width: '4px',
-                                    height: '20px',
-                                    background: card.color
-                                }}></div>
-                                <span style={{
-                                    fontSize: '0.85rem',
-                                    fontWeight: 500,
-                                    color: card.color,
-                                    textTransform: 'capitalize'
-                                }}>
-                                    {card.label}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Large Title */}
-                        <div style={{ marginBottom: '8px' }}>
-                            <h3 style={{
-                                fontSize: '2.5rem',
-                                fontWeight: 800,
-                                margin: 0,
-                                fontFamily: '"Geist", sans-serif',
-                                lineHeight: 1,
-                                textTransform: 'uppercase',
-                                color: '#ffffff',
-                                letterSpacing: '-0.02em'
-                            }}>
-                                {card.title}
-                            </h3>
-                            <span style={{
-                                fontSize: '1.5rem',
-                                fontWeight: 400,
-                                color: 'rgba(255, 255, 255, 0.8)',
-                                textTransform: 'uppercase'
-                            }}>
-                                {card.subtitle}
-                            </span>
-                        </div>
-
-                        {/* Type */}
-                        <p style={{
-                            fontSize: '0.9rem',
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            margin: '12px 0 24px 0',
-                            fontWeight: 400
-                        }}>
-                            {card.type}
-                        </p>
-
-                        {/* Dates Section */}
-                        <div style={{
-                            display: 'flex',
-                            gap: '40px',
-                            marginBottom: '32px'
-                        }}>
-                            <div>
-                                <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', margin: '0 0 4px 0' }}>
-                                    {card.startLabel}
-                                </p>
-                                <p style={{ fontSize: '0.95rem', fontWeight: 500, color: '#ffffff', margin: 0 }}>
-                                    {card.startValue}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', margin: '0 0 4px 0' }}>
-                                    {card.endLabel}
-                                </p>
-                                <p style={{ fontSize: '0.95rem', fontWeight: 500, color: '#ffffff', margin: 0 }}>
-                                    {card.endValue}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Bottom Action */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginTop: 'auto'
-                        }}>
-                            <span style={{ color: '#d9a116', fontSize: '1rem' }}>✓</span>
-                            <span style={{
-                                fontSize: '0.85rem',
-                                fontWeight: 700,
-                                color: '#ffffff',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.02em'
-                            }}>
-                                READ MORE
-                            </span>
-                        </div>
+                    <div key={index} style={{ transform: index % 2 === 1 ? 'translateY(50px)' : 'none' }}>
+                        <SectionCard
+                            className="about-card"
+                            label={card.label}
+                            labelColor={card.color}
+                            title={card.title}
+                            subtitle={card.subtitle}
+                            description={card.type}
+                            startLabel={card.startLabel}
+                            startValue={card.startValue}
+                            endLabel={card.endLabel}
+                            endValue={card.endValue}
+                        />
                     </div>
                 ))}
             </div>

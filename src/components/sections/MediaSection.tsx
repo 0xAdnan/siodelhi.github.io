@@ -2,75 +2,139 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useTheme } from '../../context/ThemeContext'
-import { ArrowUpRight, Instagram } from 'lucide-react'
+import { SectionCard } from '../ui/SectionCard'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const newsItems = [
+const mediaCards = [
     {
+        label: 'Press Release',
+        title: 'LAUNCH',
+        subtitle: 'EDUCATION',
+        description: 'New Educational Initiative',
         date: 'Oct 15, 2025',
-        title: 'SIO Delhi Launches New Educational Initiative',
-        category: 'Press Release'
+        color: '#e82828'
     },
     {
+        label: 'Event',
+        title: 'TECH',
+        subtitle: 'CONFERENCE',
+        description: 'Future Technologies',
         date: 'Sep 28, 2025',
-        title: 'Student Conference on Future Technologies',
-        category: 'Event'
+        color: '#22c55e'
     },
     {
+        label: 'Report',
+        title: 'SERVICE',
+        subtitle: 'DRIVE',
+        description: 'Community Service',
         date: 'Aug 10, 2025',
-        title: 'Community Service Drive in North Delhi',
-        category: 'Report'
+        color: '#3b82f6'
     },
     {
+        label: 'Announcement',
+        title: 'SCHOLAR',
+        subtitle: 'WINNERS',
+        description: 'Scholarship Program',
         date: 'Jul 22, 2025',
-        title: 'Scholarship Program Winners Announced',
-        category: 'Announcement'
+        color: '#f59e0b'
     }
 ]
 
 export function MediaSection() {
     const sectionRef = useRef<HTMLElement>(null)
+    const headerWrapperRef = useRef<HTMLDivElement>(null)
+    const headerRef = useRef<HTMLHeadingElement>(null)
+    const cardsContainerRef = useRef<HTMLDivElement>(null)
     const { isDark } = useTheme()
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Section heading reveal
-            gsap.fromTo(
-                '#media h2',
-                { opacity: 0, y: 60 },
+            // Header wrapper starts HIDDEN
+            gsap.set(headerWrapperRef.current, {
+                opacity: 0,
+                visibility: 'hidden'
+            })
+
+            // Initial state: Header starts large, centered, and INVISIBLE
+            gsap.set(headerRef.current, {
+                scale: 5,
+                y: '60vh',
+                x: '50vw',
+                transformOrigin: 'center center',
+                opacity: 0
+            })
+
+            // Show header wrapper when section reaches top
+            ScrollTrigger.create({
+                trigger: sectionRef.current,
+                start: 'top top',
+                end: 'bottom top',
+                onEnter: () => {
+                    gsap.set(headerWrapperRef.current, { opacity: 1, visibility: 'visible' })
+                },
+                onLeave: () => {
+                    gsap.set(headerWrapperRef.current, { opacity: 0, visibility: 'hidden' })
+                },
+                onEnterBack: () => {
+                    gsap.set(headerWrapperRef.current, { opacity: 1, visibility: 'visible' })
+                },
+                onLeaveBack: () => {
+                    gsap.set(headerWrapperRef.current, { opacity: 0, visibility: 'hidden' })
+                }
+            })
+
+            // Header opacity fades in FAST
+            gsap.fromTo(headerRef.current,
+                { opacity: 0 },
                 {
                     opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    ease: 'power3.out',
+                    ease: 'none',
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        start: 'top 80%',
-                    },
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: 0.5
+                    }
                 }
             )
 
-            // Staggered card reveals with different directions
-            gsap.fromTo(
-                '.media-item',
-                { opacity: 0, y: 80, scale: 0.95 },
+            // Header zooms in from center-bottom to left position
+            gsap.fromTo(headerRef.current,
                 {
-                    opacity: 1,
-                    y: 0,
+                    scale: 5,
+                    y: '60vh',
+                    x: '50vw'
+                },
+                {
                     scale: 1,
-                    duration: 0.8,
-                    stagger: {
-                        each: 0.15,
-                        from: 'start',
-                    },
-                    ease: 'power3.out',
+                    y: 0,
+                    x: 0,
+                    ease: 'none',
                     scrollTrigger: {
-                        trigger: '.media-item',
-                        start: 'top 85%',
-                    },
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=800',
+                        scrub: 1
+                    }
                 }
             )
+
+            // Header fades out as section ends
+            gsap.fromTo(headerRef.current,
+                { opacity: 1 },
+                {
+                    opacity: 0,
+                    ease: 'power2.in',
+                    scrollTrigger: {
+                        trigger: cardsContainerRef.current,
+                        start: 'bottom 80%',
+                        end: 'bottom 30%',
+                        scrub: 1
+                    }
+                }
+            )
+
         }, sectionRef)
 
         return () => ctx.revert()
@@ -81,206 +145,84 @@ export function MediaSection() {
             id="media"
             ref={sectionRef}
             style={{
-                padding: '80px 24px',
+                minHeight: '250vh',
+                position: 'relative',
                 background: 'transparent',
-                transition: 'background 0.3s ease',
             }}
         >
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '60px' }}>
-                    <div
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            padding: '10px 20px',
-                            background: 'rgba(255,255,255,0.05)',
-                            borderRadius: '100px',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: '8px',
-                                height: '8px',
-                                borderRadius: '50%',
-                                background: '#ff3b3b',
-                            }}
-                        />
-                        <span
-                            style={{
-                                fontSize: '14px',
-                                fontWeight: 500,
-                                color: '#ffffff',
-                            }}
-                        >
-                            Media & Updates
-                        </span>
-                    </div>
-                    <a
-                        href="#"
-                        style={{
-                            color: '#ff3b3b',
-                            textDecoration: 'none',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                        }}
-                    >
-                        View All <ArrowUpRight size={16} />
-                    </a>
-                </div>
-
-                <div
+            {/* Fixed Header Container */}
+            <div
+                ref={headerWrapperRef}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '35%',
+                    height: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingLeft: '10%',
+                    paddingRight: '40px',
+                    paddingBottom: '24vh',
+                    zIndex: 5,
+                    pointerEvents: 'none',
+                    opacity: 0,
+                    visibility: 'hidden'
+                }}
+            >
+                <h1
+                    ref={headerRef}
                     style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr',
-                        gap: '16px',
+                        fontSize: 'clamp(3rem, 6vw, 5rem)',
+                        fontWeight: 800,
+                        color: isDark ? '#ffffff' : '#111111',
+                        lineHeight: 1,
+                        margin: 0,
+                        textTransform: 'uppercase',
+                        fontFamily: '"Geist", sans-serif',
+                        letterSpacing: '-0.03em',
+                        whiteSpace: 'nowrap',
+                        pointerEvents: 'auto'
                     }}
                 >
-                    {newsItems.map((item, index) => (
-                        <div
-                            key={index}
-                            className="media-item"
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                padding: '24px',
-                                background: isDark ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
-                                border: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-                                borderRadius: '12px',
-                                transition: 'all 0.3s ease',
-                                cursor: 'pointer',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = '#ff3b3b'
-                                e.currentTarget.style.transform = 'translateX(10px)'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'
-                                e.currentTarget.style.transform = 'translateX(0)'
-                            }}
-                        >
-                            <div>
-                                <span style={{
-                                    display: 'block',
-                                    fontSize: '12px',
-                                    color: '#ff3b3b',
-                                    marginBottom: '4px',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em'
-                                }}>
-                                    {item.category} • {item.date}
-                                </span>
-                                <h3 style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: 400,
-                                    color: isDark ? '#ffffff' : '#111111',
-                                    margin: 0
-                                }}>
-                                    {item.title}
-                                </h3>
-                            </div>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: isDark ? '#ffffff' : '#111111'
-                            }}>
-                                <ArrowUpRight size={20} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                    <span style={{ color: '#ffffff' }}>MEDIA</span>
+                    <br />
+                    <span style={{ color: '#ff3333' }}>& NEWS</span>
+                </h1>
+            </div>
 
-                {/* Instagram Feed Section */}
-                <div style={{ marginTop: '60px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-                        <h3 style={{
-                            fontSize: '1.75rem',
-                            fontWeight: 400,
-                            color: isDark ? '#ffffff' : '#111111',
-                            margin: 0
-                        }}>
-                            Latest on Instagram
-                        </h3>
-                        <a
-                            href="https://www.instagram.com/siodelhi"
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{
-                                color: isDark ? '#ffffff' : '#111111',
-                                textDecoration: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                fontWeight: 500,
-                                fontSize: '14px',
-                                padding: '8px 16px',
-                                borderRadius: '100px',
-                                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)',
-                                transition: 'all 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = '#E1306C'
-                                e.currentTarget.style.color = '#E1306C'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'
-                                e.currentTarget.style.color = isDark ? '#ffffff' : '#111111'
-                            }}
-                        >
-                            <Instagram size={18} /> @siodelhi
-                        </a>
+            {/* Right Side - Cards that scroll naturally */}
+            <div
+                ref={cardsContainerRef}
+                style={{
+                    marginLeft: '35%',
+                    marginRight: '5%',
+                    width: '55%',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 280px)',
+                    gap: '32px',
+                    justifyContent: 'center',
+                    padding: '150vh 0 20vh 0',
+                    position: 'relative',
+                    alignContent: 'start',
+                    zIndex: 10
+                }}
+            >
+                {mediaCards.map((card, index) => (
+                    <div key={index} style={{ transform: index % 2 === 1 ? 'translateY(50px)' : 'none' }}>
+                        <SectionCard
+                            className="media-card"
+                            label={card.label}
+                            labelColor={card.color}
+                            title={card.title}
+                            subtitle={card.subtitle}
+                            description={card.description}
+                            startLabel="Date"
+                            startValue={card.date}
+                        />
                     </div>
-
-                    {/* Instagram Widget Container */}
-                    <div style={{
-                        width: '100%',
-                        minHeight: '400px',
-                        background: 'transparent',
-                        border: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-                        borderRadius: '24px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden'
-                    }}>
-                        {/* 
-                            PASTE YOUR WIDGET CODE HERE 
-                            Example: <div className="elfsight-app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
-                        */}
-                        <div style={{ textAlign: 'center', padding: '40px' }}>
-                            <p style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', marginBottom: '16px' }}>
-                                Instagram Feed Widget Area
-                            </p>
-                            <a
-                                href="https://elfsight.com/instagram-feed-instalink/create/"
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{
-                                    display: 'inline-block',
-                                    background: '#ff3b3b',
-                                    color: '#000',
-                                    padding: '12px 24px',
-                                    borderRadius: '8px',
-                                    textDecoration: 'none',
-                                    fontWeight: 500,
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Get Widget Code
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                ))}
             </div>
         </section>
     )

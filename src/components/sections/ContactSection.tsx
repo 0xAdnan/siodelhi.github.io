@@ -140,7 +140,7 @@ export function ContactSection() {
                                     width: '8px',
                                     height: '8px',
                                     borderRadius: '50%',
-                                    background: '#ff3b3b',
+                                    background: '#e82828',
                                 }}
                             />
                             <span

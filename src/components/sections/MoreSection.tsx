@@ -67,7 +67,7 @@ export function MoreSection() {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            background: '#ff3b3b',
+                            background: '#e82828',
                         }}
                     />
                     <span
@@ -107,7 +107,7 @@ export function MoreSection() {
                             }}
                         >
                             <div style={{
-                                color: '#ff3b3b',
+                                color: '#e82828',
                                 marginBottom: '20px'
                             }}>
                                 {item.icon}
